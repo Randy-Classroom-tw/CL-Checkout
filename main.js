@@ -8,7 +8,7 @@
 const App = {
     config: {
         // TODO: 部署後替換為實際的 Web App URL
-        WEB_APP_URL: 'YOUR_WEB_APP_URL_HERE',
+        WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxvtiNX8l0NbiqG1CNVLqRHO6X2vh5o0XCoqMZ-N9Ami1orCVn3N98L5BLnXkRmA0HsTw/exec',
 
         // API 超時設定 (毫秒)
         API_TIMEOUT: 30000,
