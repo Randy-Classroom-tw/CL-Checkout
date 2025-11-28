@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>雲川水月 - 晚班結帳系統</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/dark-hive/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg-primary: #0f0f0f;
+            --color-bg-secondary: #1a1a1a;
+            --color-bg-card: #252525;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b3b3b3;
+            --color-accent: #4a9eff;
+            --color-accent-hover: #3a8eef;
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+            --color-border: #333;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* 登入畫面 */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: var(--color-bg-card);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: var(--color-text-primary);
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background: var(--color-accent);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: var(--color-accent-hover);
+        }
+
+        .login-btn:disabled {
+            background: var(--color-border);
+            cursor: not-allowed;
+        }
+
+        /* 主畫面 */
+        #main-screen {
+            display: none;
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 20px;
+        }
+
+        .header-logo {
+            font-size: 36px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            margin-top: 10px;
+        }
+
+        .header-user {
+            font-size: 14px;
+            color: var(--color-accent);
+            margin-top: 5px;
+        }
+
+        /* 區塊卡片 */
+        .section-card {
+            background: var(--color-bg-card);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--color-bg-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #222;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .section-icon {
+            font-size: 20px;
+        }
+
+        .section-toggle {
+            transition: transform 0.3s;
+        }
+
+        .section-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 20px;
+            display: block;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        /* 表單元件 */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .form-input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .form-input[type="number"]::-webkit-inner-spin-button,
+        .form-input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            cursor: pointer;
+        }
+
+        /* 計算結果顯示 */
+        .calc-display {
+            background: var(--color-bg-primary);
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--color-accent);
+        }
+
+        /* 備註區 */
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-tag {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-tag:hover, .quick-tag.active {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        /* 送出按鈕 */
+        .submit-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: var(--color-bg-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .submit-btn {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: block;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--color-success), #20c997);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: var(--color-border);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* 提示訊息 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .toast.error {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        /* 確認對話框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--color-bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            color: var(--color-text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        .modal-btn.confirm {
+            background: var(--color-success);
+            color: white;
+        }
+
+        /* 預覽卡片 */
+        .preview-card {
+            background: var(--color-bg-primary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .preview-row:last-child {
+            border-bottom: none;
+        }
+
+        .preview-label {
+            color: var(--color-text-secondary);
+        }
+
+        .preview-value {
+            font-weight: bold;
+        }
+
+        /* 載入動畫 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* RWD */
+        @media (max-width: 500px) {
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 登入畫面 -->
+    <div id="login-screen">
+        <div class="login-container">
+            <div class="login-logo">🌙</div>
+            <h1 class="login-title">雲川水月</h1>
+            <p class="login-subtitle">晚班結帳系統</p>
+
+            <input type="text"
+                   id="login-lastfour"
+                   class="login-input"
+                   placeholder="身分證後四碼"
+                   maxlength="4"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   autocomplete="off">
+
+            <button id="login-btn" class="login-btn" onclick="handleLogin()">
+                登入
+            </button>
+        </div>
+    </div>
+
+    <!-- 主畫面 -->
+    <div id="main-screen">
+        <!-- 頁首 -->
+        <div class="header">
+            <div class="header-logo">🌙</div>
+            <h1 class="header-title">晚班結帳系統</h1>
+            <p class="header-user">結帳人：<span id="current-user">-</span></p>
+        </div>
+
+        <!-- 基本資訊 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">📋</span>
+                    基本資訊
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">結帳日期</label>
+                        <input type="date" id="checkout-date" class="form-input">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">訂位人數</label>
+                        <input type="number" id="reservation-count" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">訂位組數</label>
+                        <input type="number" id="reservation-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 營業額統計 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">💰</span>
+                    營業額統計
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">營業額 (總額)</label>
+                        <input type="number" id="total-revenue" class="form-input" placeholder="0" inputmode="numeric" onchange="calculateSummary()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">日來客數</label>
+                        <input type="number" id="total-customers" class="form-input" placeholder="0" inputmode="numeric" onchange="calculateSummary()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">平均客單價</label>
+                        <div class="calc-display" id="avg-price">$0</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">實收現金</label>
+                        <input type="number" id="cash-amount" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">信用卡</label>
+                        <input type="number" id="card-amount" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 品項分析 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">🍽️</span>
+                    品項分析
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">食物營業額</label>
+                        <input type="number" id="food-revenue" class="form-input" placeholder="0" inputmode="numeric" onchange="calculateItemRatio()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">食物佔比</label>
+                        <div class="calc-display" id="food-ratio">0%</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">套餐營業額</label>
+                        <input type="number" id="set-revenue" class="form-input" placeholder="0" inputmode="numeric" onchange="calculateItemRatio()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">套餐佔比</label>
+                        <div class="calc-display" id="set-ratio">0%</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">點購套餐組數</label>
+                        <input type="number" id="set-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 時段來客分析 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">⏰</span>
+                    時段來客
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">午餐來客</label>
+                        <input type="number" id="lunch-customers" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">下午來客</label>
+                        <input type="number" id="afternoon-customers" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">晚餐來客</label>
+                        <input type="number" id="dinner-customers" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 顧客年齡分析 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">👥</span>
+                    年齡分佈
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">35歲以下</label>
+                        <input type="number" id="age-under35" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">35-50歲</label>
+                        <input type="number" id="age-35to50" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">50歲以上</label>
+                        <input type="number" id="age-over50" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 顧客來源分析 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">📊</span>
+                    顧客來源 (組數)
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">蔬食組數</label>
+                        <input type="number" id="veg-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">葷食組數</label>
+                        <input type="number" id="meat-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">附近居民</label>
+                        <input type="number" id="local-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">外地前往</label>
+                        <input type="number" id="outtown-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">媒體曝光</label>
+                        <input type="number" id="media-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">IG/FB</label>
+                        <input type="number" id="social-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">自來客</label>
+                        <input type="number" id="walkin-groups" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 回頭客分析 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">🔄</span>
+                    回頭客
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">回頭客組數</label>
+                        <input type="number" id="return-groups" class="form-input" placeholder="0" inputmode="numeric" onchange="calculateReturnRate()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">回頭客率</label>
+                        <div class="calc-display" id="return-rate">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 店卡統計 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">💳</span>
+                    店卡統計
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">簽名店卡</label>
+                        <input type="number" id="card-signed" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">使用店卡</label>
+                        <input type="number" id="card-used" class="form-input" placeholder="0" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 備註 -->
+        <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title">
+                    <span class="section-icon">📝</span>
+                    備註
+                </div>
+                <span class="material-icons section-toggle">expand_more</span>
+            </div>
+            <div class="section-content">
+                <textarea id="remarks" class="form-textarea" placeholder="輸入備註（選填）..."></textarea>
+                <div class="quick-tags">
+                    <button type="button" class="quick-tag" onclick="addQuickTag('店休')">店休</button>
+                    <button type="button" class="quick-tag" onclick="addQuickTag('供養日')">供養日</button>
+                    <button type="button" class="quick-tag" onclick="addQuickTag('試菜')">試菜</button>
+                    <button type="button" class="quick-tag" onclick="addQuickTag('活動')">活動</button>
+                    <button type="button" class="quick-tag" onclick="addQuickTag('禪卡活動')">禪卡活動</button>
+                    <button type="button" class="quick-tag" onclick="addQuickTag('供養/教團')">供養/教團</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 送出按鈕 -->
+    <div class="submit-section" id="submit-section" style="display: none;">
+        <button class="submit-btn" id="submit-btn" onclick="confirmSubmit()">
+            送出結帳
+        </button>
+    </div>
+
+    <!-- 確認對話框 -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">確認送出？</h2>
+            <div class="modal-text" id="confirm-summary">
+                <!-- 動態填入摘要 -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+                <button class="modal-btn confirm" onclick="submitCheckout()">確認送出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="main.js"></script>
+    <script src="checkout.js"></script>
+
+</body>
+</html>
